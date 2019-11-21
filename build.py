@@ -1,44 +1,67 @@
-pages = [
-      {
-          "filename": "./content/index.html",
-          "output": "docs/index.html",
-          "title": "About Me",
-      },
-      {
-          "filename": "./content/projects.html",
-          "output": "docs/projects.html",
-          "title": "Projects",
-      },
-      {
+import os
+from jinja2 import Template
 
-          "filename": "./content/blog.html",
-          "output": "docs/blog.html",
-          "title": "blog",
-      }
-      ]
+pages = []
+blog = []
+
+def read_files():
+    for _, _, files in os.walk("./content"):
+        for filename in files:
+            title = filename.replace(".html", "")
+            title = title.capitalize()
+            pages.append({
+                "filename": "./content/" + filename,
+                "title": title,
+                "output": "./docs/{}".format(filename)
+            })
+    for _, _, files in os.walk("./blog"):
+        for filename in files:
+            title = filename.replace(".html", "")
+            title = title.capitalize()
+            blog.append({
+                "filename": "./blog/" + filename,
+                "title": title,
+                "output": "./docs/{}".format(filename)
+            })
 
 
 def gen_html():
 
     for p in pages:
-        base = "./templates/base.html"
-        # Read in the entire template
-        template = open(base).read()
-        # Read in the content of the index HTML page
-        index_content = open(p["filename"]).read()
-        # Use the string replace
+        template = open("./templates/base.html").read()
+        partial = open(p["filename"]).read()
         template = template.replace("{{title}}", p["title"])
-        finished_index_page = template.replace("{{content}}", index_content)
-        open(p["output"], "w+").write(finished_index_page)
+        template = template.replace("{{content}}", partial)
+        open(p["output"], "w+").write(template)
 
-    return True
+
+def gen_blog():
+
+    for p in blog:
+        template = open("./templates/blog.html").read()
+        partial = open(p["filename"]).read()
+        template = template.replace("{{title}}", p["title"])
+        template = template.replace("{{blog}}", partial)
+        open(p["output"], "w+").write(template)
+
+#Jinja stuff, Work in progress
+def read_template():
+
+    for p in pages:
+        html_file = open(p["filename"]).read() 
+        template_html = open("./templates/base.html").read() 
+        template = Template(template_html)
+        template = template.render("{{title}}", p["title"])
+        open(p["output"], "w+").write(template_html)
+
 
 
 def main():
-    if gen_html():
-        print('Done generating HTML files at docs/')
-    else:
-        print('oh snap, something went wrong')
+    read_files()
+    read_template()
+    #gen_html()
+    gen_blog()
+    print("Your files have been generated")
 
 if __name__ == "__main__":
     main()
