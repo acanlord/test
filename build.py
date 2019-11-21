@@ -52,7 +52,7 @@ def read_template():
         template_html = open("./templates/base.html").read() 
         template = Template(template_html)
         template = template.render("{{title}}", p["title"])
-        open(p["output"], "w+").write(template_html)
+        open(p["output"], "w+").write(html_file)
 
 
 
